@@ -36,7 +36,7 @@ module.exports = {
   },
   networks: {
     ropsten: {
-      url: 'https://eth-ropsten.alchemyapi.io/v2/u1hnSaxE-vlf3B8yEX_NvZ1o_GzcZAdL',
+      url: '',
       accounts: ['']
     },
 	TelosTestnet: {

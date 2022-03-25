@@ -1,4 +1,4 @@
-## H2 Official Telos Name Service Smart Contracts
+## Telos Name Service (.tlos) EVM Smart Contracts
 Smart Contract Deployment Supports EVM
 
 For documentation on the system, see https://tlos.domains

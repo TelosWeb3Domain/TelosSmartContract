@@ -2385,6 +2385,8 @@ contract Web3Domains is ERC721, ERC721Enumerable, AdminControl, RecordStorage, W
 
 	mapping (uint256 => string) public _tokenURIs;
 	
+	mapping (uint256 => address) internal _tokenResolvers;
+	
 	mapping(address => uint256) private _tokenReverses;
 
     mapping(uint256 => string) private _tlds;
@@ -2393,7 +2395,7 @@ contract Web3Domains is ERC721, ERC721Enumerable, AdminControl, RecordStorage, W
 	
 	bool public _saleIsActive = true;
 	
-	bool private _saleTwoCharIsActive = false;
+	bool public _saleTwoCharIsActive = false;
 
 	uint256 private _price = 1 ether;
 	
@@ -2410,7 +2412,7 @@ contract Web3Domains is ERC721, ERC721Enumerable, AdminControl, RecordStorage, W
         _;
     }
 
-    constructor() ERC721("Moonriver Name Service (.movr)", "MNS") {
+    constructor() ERC721("Web3 Domains", "W3D") {
 		
 	}
 	
@@ -2680,6 +2682,10 @@ contract Web3Domains is ERC721, ERC721Enumerable, AdminControl, RecordStorage, W
             delete _tokenReverses[_msgSender()];
         }
 		
+		if (_tokenResolvers[tokenId] != address(0)) {
+            delete _tokenResolvers[tokenId];
+        }
+		
 		_reset(tokenId);
 
         _burn(tokenId);
@@ -2721,6 +2727,51 @@ contract Web3Domains is ERC721, ERC721Enumerable, AdminControl, RecordStorage, W
 	/**
      * End: set and get Reverses
      */
+	 
+	/**
+	* Begin set and get Resolver
+	**/
+	
+	function setResolver(uint256 tokenId, address resolver) external onlyApprovedOrOwner(tokenId) {
+        _setResolver(tokenId, resolver);
+    }
+	
+	function resolverOf(string memory domain) external view returns (address) {
+		uint256 tokenId = genTokenId(domain);
+		return resolverOf(tokenId);
+	}
+
+    function resolverOf(uint256 tokenId) external view returns (address) {
+		if (_exists(tokenId) == false){
+			return address(0);
+		}
+		address resolver = _tokenResolvers[tokenId];
+        if (resolver == address(0)){
+			resolver = address(this);
+		}
+        return resolver;
+    }
+	
+	function removeResolver(string memory domain) external {
+        uint256 tokenId = genTokenId(domain);
+        address _sender = _msgSender();
+        require(_isApprovedOrOwner(_sender, tokenId), 'ReverseResolver: SENDER_IS_NOT_APPROVED_OR_OWNER');
+        delete _tokenResolvers[tokenId];
+    }
+	
+	function removeResolver(uint256 tokenId) external onlyApprovedOrOwner(tokenId) {
+        require(tokenId != 0, 'ReverseResolver: REVERSE_RECORD_IS_EMPTY');
+        delete _tokenResolvers[tokenId];
+    }
+    
+	function _setResolver(uint256 tokenId, address resolver) internal {
+        require (_exists(tokenId));
+        _tokenResolvers[tokenId] = resolver;
+        emit NewResolver(tokenId, resolver);
+    }
+	/**
+	* End Resolver
+	**/
 		
 	/**
      * Begin: Subdomain
